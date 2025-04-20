@@ -1,0 +1,36 @@
+================================================================================
+GROCERY PRICE INFLATION REPORT: December 29, 2024 to April 12, 2025
+================================================================================
+
+OVERALL INFLATION METRICS:
+- Average price change: 0.49%
+- Total products tracked: 15917
+- Products with price increases: 1204 (7.6%)
+- Products with price decreases: 419 (2.6%)
+- Products with unchanged prices: 14294 (89.8%)
+
+MONTHLY INFLATION TREND:
+- December 2024: 0.00% (from baseline)
+- January 2025: 0.06% (from baseline)
+- February 2025: 0.31% (from baseline)
+- March 2025: 0.51% (from baseline)
+- April 2025: 0.70% (from baseline)
+
+INFLATION BY CATEGORY:
+- Meat & seafood: 2.74% across 1403 products
+- Fruit & vegetables: 0.72% across 787 products
+- Dairy & eggs: 0.67% across 1819 products
+- Bakery & bread: 0.65% across 1006 products
+- Frozen food: 0.57% across 2806 products
+- Pantry: 0.04% across 4946 products
+- Everyday essentials: -0.10% across 3150 products
+
+SHOPPING BASKET ANALYSIS:
+- Standard basket cost in 2024-12: $20013.39
+- Standard basket cost in 2025-04: $17831.63
+- Total increase: $-2181.76 (-10.90%)
+
+NOTE: This analysis is based on local grocery store pricing and may differ
+from official inflation statistics. For comparison, the official food-at-home
+CPI inflation rate from the Bureau of Labor Statistics is typically available
+at https://www.bls.gov/cpi/
