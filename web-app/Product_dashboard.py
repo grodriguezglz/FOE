@@ -13,14 +13,54 @@ from datetime import datetime
 import html
 
 class ThreadedTCPServer(socketserver.ThreadingMixIn, socketserver.TCPServer):
-    """Handle requests in separate threads"""
+    """Handle requests in separate threads with better error handling"""
     allow_reuse_address = True
     daemon_threads = True
+    timeout = 30
+    
+    def handle_error(self, request, client_address):
+        """Override to suppress common network errors"""
+        import sys
+        exc_type, exc_value = sys.exc_info()[:2]
+        if exc_type == OSError and exc_value.errno in (57, 54, 32):
+            # Socket not connected, connection reset, broken pipe - ignore these
+            pass
+        else:
+            # Log other errors
+            print(f"Error handling request from {client_address}: {exc_value}")
 
 class HEBHandler(http.server.BaseHTTPRequestHandler):
+    timeout = 30
+    
     def log_message(self, format, *args):
         """Override to reduce log spam"""
         return
+    
+    def handle(self):
+        """Override to add better error handling"""
+        try:
+            super().handle()
+        except (ConnectionResetError, BrokenPipeError, OSError) as e:
+            # Client disconnected, ignore these errors
+            pass
+        except Exception as e:
+            print(f"Handler error: {e}")
+    
+    def send_html_response(self, html_content):
+        """Send HTML response with proper encoding and error handling"""
+        try:
+            self.send_response(200)
+            self.send_header('Content-Type', 'text/html; charset=utf-8')
+            self.send_header('Cache-Control', 'no-cache')
+            self.send_header('Connection', 'close')
+            self.end_headers()
+            self.wfile.write(html_content.encode('utf-8'))
+            self.wfile.flush()
+        except (ConnectionResetError, BrokenPipeError, OSError):
+            # Client disconnected while sending response
+            pass
+        except Exception as e:
+            print(f"Error sending response: {e}")
     
     def get_db_connection(self):
         try:
@@ -35,17 +75,6 @@ class HEBHandler(http.server.BaseHTTPRequestHandler):
         except Exception as e:
             print(f"Database connection error: {e}")
             return None
-    
-    def send_html_response(self, html_content):
-        """Send HTML response with proper encoding"""
-        try:
-            self.send_response(200)
-            self.send_header('Content-Type', 'text/html; charset=utf-8')
-            self.send_header('Cache-Control', 'no-cache')
-            self.end_headers()
-            self.wfile.write(html_content.encode('utf-8'))
-        except Exception as e:
-            print(f"Error sending response: {e}")
     
     def escape_text(self, text):
         """Safely escape text for HTML"""
@@ -63,10 +92,13 @@ class HEBHandler(http.server.BaseHTTPRequestHandler):
                 self.serve_product_detail()
             else:
                 self.send_error(404)
+        except (ConnectionResetError, BrokenPipeError, OSError):
+            # Client disconnected
+            pass
         except Exception as e:
             print(f"Error handling request: {e}")
             try:
-                self.send_error(500, f"Server error: {str(e)}")
+                self.send_error(500, f"Server error")
             except:
                 pass
     
@@ -830,10 +862,11 @@ if __name__ == '__main__':
     PORT = 8000
     
     try:
-        with ThreadedTCPServer(("0.0.0.0", PORT), HEBHandler) as httpd:
-            print(f"Starting HEB Dashboard on all interfaces, port {PORT}")
-            print(f"Local access: http://localhost:{PORT}")
-            print(f"Network access: http://192.168.86.29:{PORT}")
+        # Changed back to localhost only for privacy
+        with ThreadedTCPServer(("localhost", PORT), HEBHandler) as httpd:
+            print(f"Starting HEB Dashboard (PRIVATE - localhost only)")
+            print(f"Access at: http://localhost:{PORT}")
+            print("This dashboard is private and only accessible on this computer")
             print("Press Ctrl+C to stop")
             httpd.serve_forever()
     except KeyboardInterrupt:
