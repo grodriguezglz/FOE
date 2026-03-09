@@ -53,5 +53,8 @@ scraper/scraper.log
 scraper/launchd.log
 scraper/com.hebtracker.daily.plist
 
+# One-time migration script (contains local username default)
+supabase/migrate_to_supabase.py
+
 # Legacy backup folder
 Legacy-heb-grocery-tracking/
