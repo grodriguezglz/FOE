@@ -1,7 +1,7 @@
 {
-  "name": "HEB Price Tracker",
-  "short_name": "HEB Prices",
-  "description": "Track grocery price inflation and deflation at HEB over time.",
+  "name": "TX Grocery Price Tracker",
+  "short_name": "TX Grocery",
+  "description": "Track grocery price inflation and deflation over time.",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#12121f",

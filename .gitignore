@@ -43,3 +43,15 @@ data/exports/*.json
 # Temporary files
 temp/
 tmp/
+
+# Legacy scraper files (contain personal info)
+scraper/full_scraper.py
+scraper/legacy_scraper.py
+
+# Local-only scraper files (machine-specific)
+scraper/scraper.log
+scraper/launchd.log
+scraper/com.hebtracker.daily.plist
+
+# Legacy backup folder
+Legacy-heb-grocery-tracking/

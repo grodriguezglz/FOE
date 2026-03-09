@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %}Search · HEB Price Tracker{% endblock %}
+{% block title %}Search · TX Grocery Price Tracker{% endblock %}
 
 {% block content %}
 
@@ -48,7 +48,7 @@
                 <label class="form-label section-title mb-1">Brand</label>
                 <select name="brand" class="form-select">
                     <option value="">All Brands</option>
-                    <option value="heb" {% if brand_filter == 'heb' %}selected{% endif %}>HEB Own Brand Only</option>
+                    <option value="heb" {% if brand_filter == 'heb' %}selected{% endif %}>Store Brand Only</option>
                 </select>
             </div>
 
@@ -79,7 +79,7 @@
              data-href="/product/{{ p.product_id | urlencode }}">
 
             {% if p.is_own_brand %}
-            <span class="heb-badge position-absolute" style="top:12px; right:12px;">HEB</span>
+            <span class="heb-badge position-absolute" style="top:12px; right:12px;">Store Brand</span>
             {% endif %}
 
             <!-- Product info -->

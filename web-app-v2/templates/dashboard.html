@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %}Dashboard · HEB Price Tracker{% endblock %}
+{% block title %}Dashboard · TX Grocery Price Tracker{% endblock %}
 
 {% block content %}
 
@@ -7,7 +7,7 @@
 <div class="d-flex flex-wrap align-items-center gap-3 page-header">
     <div>
         <h1 class="mb-0">Price Inflation Dashboard</h1>
-        <p class="text-muted mb-0">Real grocery price changes tracked over time at HEB</p>
+        <p class="text-muted mb-0">Real grocery price changes tracked over time at a Texas grocery store</p>
     </div>
 
     {% if overall_inflation is not none %}
@@ -21,6 +21,38 @@
         </div>
     </div>
     {% endif %}
+</div>
+
+<!-- ── Work in progress disclaimer ──────────────────────── -->
+<div class="alert d-flex align-items-start gap-3 mb-3" style="background:#FFF9E6; border:1px solid #F59E0B; border-radius: var(--radius); padding:1rem 1.25rem;">
+    <i class="fas fa-triangle-exclamation mt-1" style="color:#F59E0B; font-size:1.1rem; flex-shrink:0;"></i>
+    <div style="font-size:0.9rem; color:#78350F;">
+        <strong>Work in Progress</strong> — This tracker currently covers a limited number of grocery categories.
+        Expanding coverage takes time and storage, so more categories will be added gradually.
+        Data is collected daily and may have gaps. Use as a general reference, not a definitive record.
+    </div>
+</div>
+
+<!-- ── Why this exists ────────────────────────────────────── -->
+<div class="card mb-4 p-4" style="border-left: 4px solid var(--heb-red); background: #fff;">
+    <h5 class="fw-bold mb-2" style="color: var(--heb-red);">
+        <i class="fas fa-bullhorn me-2"></i>Why This Exists
+    </h5>
+    <p class="mb-2 text-muted" style="font-size:0.97rem; line-height:1.7;">
+        For most of my life, I never paid attention to grocery prices — until I noticed my ground beef had quietly
+        doubled since 2021. That moment sent me looking for answers: online databases, price history tools,
+        anything that could show me what was actually happening. I found nothing. Grocery companies don't share
+        that data, and the government's inflation numbers tell you a percentage — not the price of the specific
+        items in your cart.
+    </p>
+    <p class="mb-2 text-muted" style="font-size:0.97rem; line-height:1.7;">
+        So I built my own tracker. Every day, a scraper pulls real prices directly from the store's catalog and
+        stores them — giving you the kind of price history that no retailer wants you to have.
+    </p>
+    <p class="mb-0 text-muted" style="font-size:0.97rem; line-height:1.7;">
+        The goal isn't politics. It's just data. <strong>See for yourself what's gone up, what's come down,
+        and by how much</strong> — no spokesperson required.
+    </p>
 </div>
 
 <!-- ── Stats row ──────────────────────────────────────────── -->
