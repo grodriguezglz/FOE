@@ -9,6 +9,7 @@ Improvements:
 - Kept fresh session per category (intentional for anti-bot evasion)
 """
 
+import os
 import pandas as pd
 import requests
 from requests.sessions import Session
@@ -21,11 +22,11 @@ def create_database():
     """Create PostgreSQL database connection"""
     try:
         conn = psycopg2.connect(
-            host="localhost",
-            port=5432,
-            database="heb_products",
-            user="memorodriguez",
-            password=""
+            host=os.getenv('DB_HOST', 'localhost'),
+            port=int(os.getenv('DB_PORT', '5432')),
+            database=os.getenv('DB_NAME', 'heb_products'),
+            user=os.getenv('DB_USER', 'postgres'),
+            password=os.getenv('DB_PASSWORD', '')
         )
         return conn
     except Exception as e:

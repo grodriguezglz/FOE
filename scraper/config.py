@@ -10,7 +10,7 @@ class DatabaseConfig:
     host: str = "localhost"
     port: int = 5432
     database: str = "heb_products"
-    user: str = "memorodriguez"  # Your username
+    user: str = os.getenv('DB_USER', 'postgres')
     password: str = ""
     min_connections: int = 1
     max_connections: int = 10
