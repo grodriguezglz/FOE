@@ -1,0 +1,160 @@
+{% extends "base.html" %}
+{% block title %}Search · HEB Price Tracker{% endblock %}
+
+{% block content %}
+
+<!-- ── Page header ─────────────────────────────────────────── -->
+<div class="page-header">
+    <h1 class="mb-0">Product Search</h1>
+    <p class="text-muted">
+        {% if q %}Results for "<strong>{{ q }}</strong>"{% elif category %}Category: <strong>{{ category }}</strong>{% else %}Browse all products{% endif %}
+        &nbsp;·&nbsp; <span class="fw-semibold">{{ result_count }}</span> results
+    </p>
+</div>
+
+<!-- ── Filter bar ──────────────────────────────────────────── -->
+<div class="card p-3 mb-4">
+    <form method="get" action="/search">
+        <div class="row g-2 align-items-end">
+
+            <div class="col-12 col-md-4">
+                <label class="form-label section-title mb-1">Search</label>
+                <input type="text" name="q" value="{{ q }}" class="form-control"
+                       placeholder="Product name or brand…" autocomplete="off">
+            </div>
+
+            <div class="col-6 col-md-3">
+                <label class="form-label section-title mb-1">Category</label>
+                <select name="category" class="form-select">
+                    <option value="">All Categories</option>
+                    {% for cat in all_categories %}
+                    <option value="{{ cat }}" {% if cat == category %}selected{% endif %}>{{ cat }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="col-6 col-md-2">
+                <label class="form-label section-title mb-1">Sort By</label>
+                <select name="sort" class="form-select">
+                    <option value="name"           {% if sort == 'name' %}selected{% endif %}>Name A–Z</option>
+                    <option value="price_asc"      {% if sort == 'price_asc' %}selected{% endif %}>Price: Low → High</option>
+                    <option value="price_desc"     {% if sort == 'price_desc' %}selected{% endif %}>Price: High → Low</option>
+                    <option value="pct_change"     {% if sort == 'pct_change' %}selected{% endif %}>Biggest Increases ↑</option>
+                    <option value="pct_change_asc" {% if sort == 'pct_change_asc' %}selected{% endif %}>Biggest Drops ↓</option>
+                </select>
+            </div>
+
+            <div class="col-6 col-md-2">
+                <label class="form-label section-title mb-1">Brand</label>
+                <select name="brand" class="form-select">
+                    <option value="">All Brands</option>
+                    <option value="heb" {% if brand_filter == 'heb' %}selected{% endif %}>HEB Own Brand Only</option>
+                </select>
+            </div>
+
+            <div class="col-6 col-md-1 d-flex gap-2">
+                <button type="submit" class="btn btn-heb w-100">
+                    <i class="fas fa-search"></i>
+                </button>
+            </div>
+
+        </div>
+
+        {% if q or category or brand_filter %}
+        <div class="mt-2">
+            <a href="/search" class="text-muted small">
+                <i class="fas fa-times-circle me-1"></i>Clear all filters
+            </a>
+        </div>
+        {% endif %}
+    </form>
+</div>
+
+<!-- ── Results grid ────────────────────────────────────────── -->
+{% if products %}
+<div class="row row-cols-1 row-cols-md-2 row-cols-xl-3 g-3">
+    {% for p in products %}
+    <div class="col">
+        <div class="card card-hover h-100 p-3 position-relative"
+             data-href="/product/{{ p.product_id | urlencode }}">
+
+            {% if p.is_own_brand %}
+            <span class="heb-badge position-absolute" style="top:12px; right:12px;">HEB</span>
+            {% endif %}
+
+            <!-- Product info -->
+            <div class="pe-4 mb-2">
+                <div class="fw-semibold" style="font-size:0.95rem; line-height:1.45;">
+                    {{ p.product_name }}
+                </div>
+                <div class="text-muted" style="font-size:0.82rem; margin-top:2px;">
+                    {{ p.brand_name }}
+                </div>
+            </div>
+
+            <!-- Category tag + change badge -->
+            <div class="d-flex align-items-center gap-2 mb-3">
+                <span class="text-muted" style="font-size:0.78rem; background:#F1F5F9; padding:2px 8px; border-radius:4px;">
+                    {{ p.category_name }}
+                </span>
+                {% if p.pct_change is not none %}
+                    {% if p.pct_change > 0 %}
+                        <span class="badge badge-up rounded-pill ms-auto">+{{ p.pct_change }}%</span>
+                    {% elif p.pct_change < 0 %}
+                        <span class="badge badge-down rounded-pill ms-auto">{{ p.pct_change }}%</span>
+                    {% else %}
+                        <span class="badge badge-flat rounded-pill ms-auto">No change</span>
+                    {% endif %}
+                {% elif p.record_count and p.record_count == 1 %}
+                    <span class="badge badge-flat rounded-pill ms-auto" title="Only one data point so far">New</span>
+                {% endif %}
+            </div>
+
+            <!-- Price footer -->
+            <div class="border-top pt-2 mt-auto d-flex justify-content-between align-items-end">
+                <div>
+                    {% if p.first_price and p.current_price and p.first_price != p.current_price %}
+                    <div class="text-muted" style="font-size:0.77rem; text-decoration:line-through;">
+                        ${{ "%.2f"|format(p.first_price) }} first recorded
+                    </div>
+                    {% endif %}
+                    {% if p.last_seen %}
+                    <div class="text-muted" style="font-size:0.75rem;">
+                        Updated {{ p.last_seen.strftime('%b %d, %Y') }}
+                    </div>
+                    {% endif %}
+                </div>
+                <div class="text-end">
+                    {% if p.current_price %}
+                    <span class="fw-bold" style="font-size:1.25rem; color:var(--heb-red);">
+                        ${{ "%.2f"|format(p.current_price) }}
+                    </span>
+                    {% else %}
+                    <span class="text-muted">No price</span>
+                    {% endif %}
+                </div>
+            </div>
+
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+{% if result_count == 200 %}
+<p class="text-muted text-center mt-3 small">
+    Showing first 200 results. Try a more specific search to narrow down.
+</p>
+{% endif %}
+
+{% else %}
+<div class="card">
+    <div class="empty-state">
+        <i class="fas fa-magnifying-glass"></i>
+        <h5 class="text-muted">No products found</h5>
+        <p class="text-muted mb-3">Try a different search term or clear your filters.</p>
+        <a href="/search" class="btn btn-heb">Browse All Products</a>
+    </div>
+</div>
+{% endif %}
+
+{% endblock %}

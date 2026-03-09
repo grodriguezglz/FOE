@@ -19,9 +19,12 @@ venv.bak/
 *.log
 logs/
 
-# Environment variables
+# Environment variables — NEVER commit these
 .env
 .env.local
+.env.production
+web-app-v2/.env
+scraper/.env
 
 # IDE
 .vscode/

@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>{% block title %}HEB Price Tracker{% endblock %}</title>
+
+    <!-- PWA -->
+    <link rel="manifest" href="/static/manifest.json">
+    <meta name="theme-color" content="#E31837">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="HEB Prices">
+    <link rel="apple-touch-icon" href="/static/icon-192.png">
+
+    <!-- SEO -->
+    <meta name="description" content="Track HEB grocery price inflation and deflation over time.">
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
+          integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN"
+          crossorigin="anonymous" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+          integrity="sha512-Avb2QiuDEEvB4bZJYdft2mNjVShBftLdPG8FJ0V7irTLQ8Uo0qcPxh4Plh7eecoDWtxpUXJ7PYGz72hZFRv/Q=="
+          crossorigin="anonymous" rel="stylesheet">
+
+    <style>
+        /* ── Brand tokens ──────────────────────────────────────── */
+        :root {
+            --heb-red:    #E31837;
+            --heb-dark:   #12121f;
+            --heb-mid:    #1e1e36;
+            --green:      #10B981;
+            --red:        #EF4444;
+            --bg:         #F0F2F5;
+            --card-bg:    #ffffff;
+            --text:       #1E293B;
+            --muted:      #64748B;
+            --border:     #E2E8F0;
+            --shadow:     0 1px 4px rgba(0,0,0,0.09), 0 1px 2px rgba(0,0,0,0.06);
+            --shadow-lg:  0 8px 24px rgba(0,0,0,0.12);
+            --radius:     12px;
+        }
+
+        /* ── Base ──────────────────────────────────────────────── */
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            font-size: 0.94rem;
+        }
+        a { color: var(--heb-red); text-decoration: none; }
+        a:hover { color: #c0112a; text-decoration: underline; }
+
+        /* ── Navbar ────────────────────────────────────────────── */
+        .navbar {
+            background: var(--heb-dark) !important;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.4);
+            padding: 0.65rem 0;
+        }
+        .navbar-brand {
+            font-weight: 900;
+            font-size: 1.35rem;
+            letter-spacing: -0.5px;
+            color: white !important;
+        }
+        .navbar-brand .brand-heb {
+            color: var(--heb-red);
+        }
+        .navbar-brand .brand-sub {
+            font-weight: 400;
+            color: rgba(255,255,255,0.65);
+            font-size: 0.85rem;
+            letter-spacing: 0;
+        }
+        .nav-link {
+            color: rgba(255,255,255,0.72) !important;
+            font-weight: 500;
+            padding: 0.5rem 1rem !important;
+            border-radius: 6px;
+            transition: all 0.15s;
+        }
+        .nav-link:hover { color: #fff !important; background: rgba(255,255,255,0.08); }
+        .nav-link.active { color: #fff !important; background: rgba(227,24,55,0.25); }
+        .search-bar-input {
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
+            color: white;
+            border-radius: 20px 0 0 20px;
+            width: 200px;
+            font-size: 0.88rem;
+        }
+        .search-bar-input::placeholder { color: rgba(255,255,255,0.45); }
+        .search-bar-input:focus {
+            background: rgba(255,255,255,0.18);
+            border-color: var(--heb-red);
+            color: white;
+            box-shadow: none;
+        }
+        .search-bar-btn {
+            background: var(--heb-red);
+            border: none;
+            color: white;
+            border-radius: 0 20px 20px 0;
+            padding: 0.375rem 0.85rem;
+        }
+        .search-bar-btn:hover { background: #c0112a; color: white; }
+
+        /* ── Cards ─────────────────────────────────────────────── */
+        .card {
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            background: var(--card-bg);
+        }
+        .card-hover {
+            transition: transform 0.15s, box-shadow 0.15s;
+            cursor: pointer;
+        }
+        .card-hover:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        /* ── Stat cards ─────────────────────────────────────────── */
+        .stat-card .stat-val {
+            font-size: 2rem;
+            font-weight: 800;
+            line-height: 1.15;
+        }
+        .stat-card .stat-lbl {
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.07em;
+            color: var(--muted);
+        }
+
+        /* ── Badges ─────────────────────────────────────────────── */
+        .badge-up   { background: #FEE2E2; color: #B91C1C; font-weight: 700; }
+        .badge-down { background: #D1FAE5; color: #065F46; font-weight: 700; }
+        .badge-flat { background: #F1F5F9; color: #475569; font-weight: 600; }
+
+        /* ── Buttons ─────────────────────────────────────────────── */
+        .btn-heb        { background: var(--heb-red); color: #fff; border: none; }
+        .btn-heb:hover  { background: #c0112a; color: #fff; }
+
+        /* ── Section titles ─────────────────────────────────────── */
+        .section-title {
+            font-size: 0.78rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--muted);
+            margin-bottom: 0.85rem;
+        }
+
+        /* ── Table tweaks ─────────────────────────────────────────── */
+        .table thead th {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            color: var(--muted);
+            border-bottom: 2px solid var(--border);
+            font-weight: 700;
+            background: #fafbfc;
+        }
+        .table-hover tbody tr:hover { background: #f8faff; cursor: pointer; }
+
+        /* ── Change colors ──────────────────────────────────────── */
+        .price-up   { color: #DC2626; }
+        .price-down { color: #059669; }
+
+        /* ── Product name truncation ────────────────────────────── */
+        .product-name {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 260px;
+        }
+
+        /* ── Footer ─────────────────────────────────────────────── */
+        footer {
+            background: var(--heb-dark);
+            color: rgba(255,255,255,0.45);
+            padding: 1.5rem 0;
+            margin-top: 3.5rem;
+            font-size: 0.82rem;
+            text-align: center;
+        }
+
+        /* ── Breadcrumb ──────────────────────────────────────────── */
+        .breadcrumb { font-size: 0.85rem; }
+        .breadcrumb-item a { color: var(--muted); }
+        .breadcrumb-item.active { color: var(--text); }
+
+        /* ── HEB brand badge ─────────────────────────────────────── */
+        .heb-badge {
+            background: var(--heb-red);
+            color: white;
+            font-size: 0.68rem;
+            font-weight: 700;
+            padding: 2px 7px;
+            border-radius: 4px;
+            letter-spacing: 0.04em;
+        }
+
+        /* ── Page header ─────────────────────────────────────────── */
+        .page-header {
+            margin-bottom: 1.75rem;
+        }
+        .page-header h1 {
+            font-size: 1.6rem;
+            font-weight: 800;
+            margin-bottom: 0.2rem;
+        }
+
+        /* ── Inflation hero number ───────────────────────────────── */
+        .inflation-hero {
+            background: linear-gradient(135deg, var(--heb-dark) 0%, var(--heb-mid) 100%);
+            color: white;
+            border-radius: var(--radius);
+            padding: 1.4rem 2rem;
+            box-shadow: var(--shadow-lg);
+        }
+        .inflation-hero .lbl { font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; opacity: 0.6; }
+        .inflation-hero .val { font-size: 2.6rem; font-weight: 900; line-height: 1.1; }
+
+        /* ── No-data placeholder ─────────────────────────────────── */
+        .empty-state { color: var(--muted); text-align: center; padding: 3rem 1rem; }
+        .empty-state i { font-size: 2.5rem; opacity: 0.2; display: block; margin-bottom: 0.75rem; }
+    </style>
+</head>
+<body>
+
+<!-- ── Navbar ──────────────────────────────────────────────────────────── -->
+<nav class="navbar navbar-expand-lg">
+    <div class="container">
+        <a class="navbar-brand" href="/">
+            <span class="brand-heb">HEB</span> Price Tracker
+            <span class="brand-sub ms-1">inflation monitor</span>
+        </a>
+
+        <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#nav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="nav">
+            <ul class="navbar-nav me-auto ms-3">
+                <li class="nav-item">
+                    <a class="nav-link {% if request.path == '/' %}active{% endif %}" href="/">
+                        <i class="fas fa-chart-line me-1"></i>Dashboard
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link {% if request.path.startswith('/search') %}active{% endif %}" href="/search">
+                        <i class="fas fa-magnifying-glass me-1"></i>Search
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link {% if request.path == '/categories' %}active{% endif %}" href="/categories">
+                        <i class="fas fa-layer-group me-1"></i>Categories
+                    </a>
+                </li>
+            </ul>
+
+            <form class="d-flex align-items-center ms-lg-3 mt-2 mt-lg-0" action="/search" method="get">
+                <input type="text" name="q" class="form-control search-bar-input"
+                       placeholder="Search products…" autocomplete="off">
+                <button type="submit" class="btn search-bar-btn">
+                    <i class="fas fa-search"></i>
+                </button>
+            </form>
+        </div>
+    </div>
+</nav>
+
+<!-- ── Main content ────────────────────────────────────────────────────── -->
+<main class="container py-4">
+    {% block content %}{% endblock %}
+</main>
+
+<footer>
+    HEB Price Tracker &nbsp;·&nbsp; Not affiliated with H-E-B LP &nbsp;·&nbsp; Data from HEB.com
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL"
+        crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"
+        integrity="sha384-OVNSqGCGWzq8MXjA8Fyi0ZhbkxSSFtj6bY7uriL2SFaGdMNePd3MUkWkGVhAbxf"
+        crossorigin="anonymous"></script>
+
+<!-- Safe navigation: replaces all onclick= patterns with data-href -->
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    document.querySelectorAll('[data-href]').forEach(function (el) {
+        el.style.cursor = 'pointer';
+        el.addEventListener('click', function () {
+            window.location.href = el.getAttribute('data-href');
+        });
+    });
+});
+</script>
+
+{% block scripts %}{% endblock %}
+
+<!-- PWA: register service worker -->
+<script>
+if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/static/sw.js')
+            .catch(err => console.warn('SW registration failed:', err));
+    });
+}
+</script>
+</body>
+</html>

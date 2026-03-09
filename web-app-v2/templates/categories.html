@@ -1,0 +1,137 @@
+{% extends "base.html" %}
+{% block title %}Categories · HEB Price Tracker{% endblock %}
+
+{% block content %}
+
+<!-- ── Page header ─────────────────────────────────────────── -->
+<div class="page-header">
+    <h1 class="mb-0">Category Inflation Tracker</h1>
+    <p class="text-muted">Average price change per grocery category — sorted by highest inflation first</p>
+</div>
+
+{% if categories %}
+
+<!-- ── Summary bar ─────────────────────────────────────────── -->
+{% set total_cats = categories | length %}
+{% set inflated   = categories | selectattr('avg_pct_change', '>', 0) | list | length %}
+{% set deflated   = categories | selectattr('avg_pct_change', '<', 0) | list | length %}
+
+<div class="row g-3 mb-4">
+    <div class="col-4">
+        <div class="card stat-card p-3 text-center">
+            <div class="stat-lbl">Total Categories</div>
+            <div class="stat-val" style="color:var(--heb-red);">{{ total_cats }}</div>
+        </div>
+    </div>
+    <div class="col-4">
+        <div class="card stat-card p-3 text-center">
+            <div class="stat-lbl">↑ Avg. Price Up</div>
+            <div class="stat-val price-up">{{ inflated }}</div>
+        </div>
+    </div>
+    <div class="col-4">
+        <div class="card stat-card p-3 text-center">
+            <div class="stat-lbl">↓ Avg. Price Down</div>
+            <div class="stat-val price-down">{{ deflated }}</div>
+        </div>
+    </div>
+</div>
+
+<!-- ── Category cards ─────────────────────────────────────── -->
+<div class="row row-cols-1 row-cols-md-2 row-cols-xl-3 g-3">
+    {% for cat in categories %}
+    <div class="col">
+        <div class="card card-hover h-100 p-4"
+             data-href="/search?category={{ cat.category_name | urlencode }}">
+
+            <!-- Header row: name + change badge -->
+            <div class="d-flex justify-content-between align-items-start mb-3">
+                <h5 class="fw-bold mb-0 me-2" style="font-size:1rem; line-height:1.4;">
+                    {{ cat.category_name }}
+                </h5>
+                {% if cat.avg_pct_change is not none %}
+                    {% if cat.avg_pct_change > 0 %}
+                        <span class="badge badge-up rounded-pill flex-shrink-0" style="font-size:0.88rem;">
+                            ↑ +{{ cat.avg_pct_change }}%
+                        </span>
+                    {% elif cat.avg_pct_change < 0 %}
+                        <span class="badge badge-down rounded-pill flex-shrink-0" style="font-size:0.88rem;">
+                            ↓ {{ cat.avg_pct_change }}%
+                        </span>
+                    {% else %}
+                        <span class="badge badge-flat rounded-pill flex-shrink-0" style="font-size:0.88rem;">
+                            No change
+                        </span>
+                    {% endif %}
+                {% else %}
+                    <span class="badge badge-flat rounded-pill flex-shrink-0" style="font-size:0.85rem;">
+                        New
+                    </span>
+                {% endif %}
+            </div>
+
+            <!-- Mini stats row -->
+            <div class="row g-0 text-center mb-3"
+                 style="background:#F8FAFC; border-radius:8px; overflow:hidden; border:1px solid var(--border);">
+                <div class="col-4 py-2" style="border-right:1px solid var(--border);">
+                    <div class="fw-bold" style="color:var(--heb-red); font-size:1.05rem;">
+                        {{ cat.product_count }}
+                    </div>
+                    <div class="text-muted" style="font-size:0.7rem; font-weight:600; text-transform:uppercase; letter-spacing:.05em;">
+                        Products
+                    </div>
+                </div>
+                <div class="col-4 py-2" style="border-right:1px solid var(--border);">
+                    <div class="fw-bold price-up" style="font-size:1.05rem;">{{ cat.increased }}</div>
+                    <div class="text-muted" style="font-size:0.7rem; font-weight:600; text-transform:uppercase; letter-spacing:.05em;">
+                        ↑ Went Up
+                    </div>
+                </div>
+                <div class="col-4 py-2">
+                    <div class="fw-bold price-down" style="font-size:1.05rem;">{{ cat.decreased }}</div>
+                    <div class="text-muted" style="font-size:0.7rem; font-weight:600; text-transform:uppercase; letter-spacing:.05em;">
+                        ↓ Went Down
+                    </div>
+                </div>
+            </div>
+
+            <!-- Price comparison footer -->
+            <div class="mt-auto border-top pt-2">
+                <div class="d-flex justify-content-between align-items-center">
+                    <span class="text-muted" style="font-size:0.8rem;">Avg. current price</span>
+                    <span class="fw-bold">
+                        {% if cat.avg_price %}${{ "%.2f"|format(cat.avg_price) }}{% else %}—{% endif %}
+                    </span>
+                </div>
+                {% if cat.avg_first_price and cat.avg_price and cat.avg_pct_change %}
+                <div class="d-flex justify-content-between align-items-center mt-1">
+                    <span class="text-muted" style="font-size:0.8rem;">Was (first recorded)</span>
+                    <span class="text-muted" style="font-size:0.8rem; text-decoration:line-through;">
+                        ${{ "%.2f"|format(cat.avg_first_price) }}
+                    </span>
+                </div>
+                {% endif %}
+                {% if cat.one_record and cat.one_record > 0 %}
+                <div class="mt-1 text-muted" style="font-size:0.75rem;">
+                    <i class="fas fa-circle-info me-1"></i>
+                    {{ cat.one_record }} product{{ 's' if cat.one_record > 1 }} with only one data point
+                </div>
+                {% endif %}
+            </div>
+
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+{% else %}
+<div class="card">
+    <div class="empty-state">
+        <i class="fas fa-layer-group"></i>
+        <h5 class="text-muted">No categories found</h5>
+        <p class="text-muted">Run the scraper to start collecting data.</p>
+    </div>
+</div>
+{% endif %}
+
+{% endblock %}

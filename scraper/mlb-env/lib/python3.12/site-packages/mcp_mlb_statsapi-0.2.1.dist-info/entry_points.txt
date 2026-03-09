@@ -1,0 +1,2 @@
+[console_scripts]
+mcp_mlb_statsapi = mcp_mlb_statsapi:main

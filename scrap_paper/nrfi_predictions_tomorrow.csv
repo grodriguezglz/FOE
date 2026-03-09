@@ -1,0 +1,5 @@
+game_id,game_time,away_team,home_team,away_pitcher,home_pitcher,away_pitcher_nrfi_rate,home_pitcher_nrfi_rate,predicted_nrfi_probability,confidence_level,venue
+Unknown,2025-08-07,Athletics,Washington Nationals,Jacob Lopez,Mitchell Parker,0.65,0.65,0.2875640625,LOW,Unknown
+Unknown,2025-08-07,Chicago White Sox,Seattle Mariners,Shane Smith,Logan Gilbert,0.65,0.65,0.2875640625,LOW,Unknown
+Unknown,2025-08-07,Cincinnati Reds,Pittsburgh Pirates,Brady Singer,Paul Skenes,0.65,0.65,0.2875640625,LOW,Unknown
+Unknown,2025-08-07,Miami Marlins,Atlanta Braves,Eury Pérez,Carlos Carrasco,0.65,0.65,0.2875640625,LOW,Unknown

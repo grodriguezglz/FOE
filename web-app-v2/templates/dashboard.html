@@ -1,0 +1,193 @@
+{% extends "base.html" %}
+{% block title %}Dashboard · HEB Price Tracker{% endblock %}
+
+{% block content %}
+
+<!-- ── Page header ────────────────────────────────────────── -->
+<div class="d-flex flex-wrap align-items-center gap-3 page-header">
+    <div>
+        <h1 class="mb-0">Price Inflation Dashboard</h1>
+        <p class="text-muted mb-0">Real grocery price changes tracked over time at HEB</p>
+    </div>
+
+    {% if overall_inflation is not none %}
+    <div class="ms-auto">
+        <div class="inflation-hero">
+            <div class="lbl">Overall Avg. Change</div>
+            <div class="val {% if overall_inflation > 0 %}text-danger{% elif overall_inflation < 0 %}text-success{% else %}text-white{% endif %}">
+                {% if overall_inflation > 0 %}+{% endif %}{{ overall_inflation }}%
+            </div>
+            <div style="font-size:0.78rem; opacity:0.55; margin-top:2px;">across all tracked products</div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<!-- ── Stats row ──────────────────────────────────────────── -->
+<div class="row g-3 mb-4">
+    <div class="col-6 col-md-3">
+        <div class="card stat-card p-3 h-100">
+            <div class="stat-lbl">Products Tracked</div>
+            <div class="stat-val" style="color: var(--heb-red);">{{ "{:,}".format(stats.total_products) }}</div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="card stat-card p-3 h-100">
+            <div class="stat-lbl">Categories</div>
+            <div class="stat-val" style="color: #6366F1;">{{ stats.total_categories }}</div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="card stat-card p-3 h-100">
+            <div class="stat-lbl">Price Records</div>
+            <div class="stat-val" style="color: #0EA5E9;">{{ "{:,}".format(stats.total_prices) }}</div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="card stat-card p-3 h-100">
+            <div class="stat-lbl">Days Tracking</div>
+            <div class="stat-val" style="color: #F59E0B;">{{ stats.days_tracked }}</div>
+            {% if stats.first_record %}
+            <div class="text-muted mt-1" style="font-size:0.75rem;">Since {{ stats.first_record.strftime('%b %d, %Y') }}</div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- ── Price movers ───────────────────────────────────────── -->
+<div class="row g-4 mb-4">
+
+    <!-- Biggest Increases -->
+    <div class="col-lg-6">
+        <div class="section-title">
+            <i class="fas fa-arrow-trend-up price-up me-1"></i> Biggest Price Increases
+        </div>
+        {% if top_increases %}
+        <div class="card">
+            <ul class="list-group list-group-flush">
+                {% for p in top_increases %}
+                <li class="list-group-item list-group-item-action px-3 py-3"
+                    data-href="/product/{{ p.product_id | urlencode }}">
+                    <div class="d-flex align-items-center gap-2">
+                        <div style="flex:1; min-width:0;">
+                            <div class="fw-semibold product-name" title="{{ p.product_name }}">{{ p.product_name }}</div>
+                            <div class="text-muted" style="font-size:0.8rem;">{{ p.brand_name }} · {{ p.category_name }}</div>
+                        </div>
+                        <div class="text-end flex-shrink-0">
+                            <span class="badge badge-up rounded-pill" style="font-size:0.88rem;">
+                                +{{ p.pct_change }}%
+                            </span>
+                            <div class="text-muted mt-1" style="font-size:0.78rem;">
+                                ${{ "%.2f"|format(p.first_price) }} → ${{ "%.2f"|format(p.last_price) }}
+                            </div>
+                        </div>
+                    </div>
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+        {% else %}
+        <div class="card">
+            <div class="empty-state">
+                <i class="fas fa-chart-line"></i>
+                <p class="mb-0">No price increases found yet.<br>
+                <small>Run the scraper multiple times to track changes.</small></p>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Biggest Drops -->
+    <div class="col-lg-6">
+        <div class="section-title">
+            <i class="fas fa-arrow-trend-down price-down me-1"></i> Biggest Price Drops
+        </div>
+        {% if top_decreases %}
+        <div class="card">
+            <ul class="list-group list-group-flush">
+                {% for p in top_decreases %}
+                <li class="list-group-item list-group-item-action px-3 py-3"
+                    data-href="/product/{{ p.product_id | urlencode }}">
+                    <div class="d-flex align-items-center gap-2">
+                        <div style="flex:1; min-width:0;">
+                            <div class="fw-semibold product-name" title="{{ p.product_name }}">{{ p.product_name }}</div>
+                            <div class="text-muted" style="font-size:0.8rem;">{{ p.brand_name }} · {{ p.category_name }}</div>
+                        </div>
+                        <div class="text-end flex-shrink-0">
+                            <span class="badge badge-down rounded-pill" style="font-size:0.88rem;">
+                                {{ p.pct_change }}%
+                            </span>
+                            <div class="text-muted mt-1" style="font-size:0.78rem;">
+                                ${{ "%.2f"|format(p.first_price) }} → ${{ "%.2f"|format(p.last_price) }}
+                            </div>
+                        </div>
+                    </div>
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+        {% else %}
+        <div class="card">
+            <div class="empty-state">
+                <i class="fas fa-tag"></i>
+                <p class="mb-0">No price drops detected yet.</p>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- ── Category inflation table ───────────────────────────── -->
+{% if categories %}
+<div class="section-title">
+    <i class="fas fa-layer-group me-1"></i> Inflation by Category
+</div>
+<div class="card">
+    <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+            <thead>
+                <tr>
+                    <th>Category</th>
+                    <th class="text-center">Products</th>
+                    <th class="text-center">Avg. Change</th>
+                    <th class="text-center">
+                        <span class="price-up">↑ Increased</span>
+                    </th>
+                    <th class="text-center">
+                        <span class="price-down">↓ Decreased</span>
+                    </th>
+                    <th class="text-end">Avg. Price Now</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for cat in categories %}
+                <tr data-href="/search?category={{ cat.category_name | urlencode }}">
+                    <td class="fw-semibold">{{ cat.category_name }}</td>
+                    <td class="text-center text-muted">{{ cat.product_count }}</td>
+                    <td class="text-center">
+                        {% if cat.avg_pct_change is not none %}
+                            {% if cat.avg_pct_change > 0 %}
+                                <span class="badge badge-up rounded-pill">+{{ cat.avg_pct_change }}%</span>
+                            {% elif cat.avg_pct_change < 0 %}
+                                <span class="badge badge-down rounded-pill">{{ cat.avg_pct_change }}%</span>
+                            {% else %}
+                                <span class="badge badge-flat rounded-pill">0%</span>
+                            {% endif %}
+                        {% else %}
+                            <span class="text-muted" style="font-size:0.8rem;">No history</span>
+                        {% endif %}
+                    </td>
+                    <td class="text-center price-up fw-semibold">{{ cat.increased }}</td>
+                    <td class="text-center price-down fw-semibold">{{ cat.decreased }}</td>
+                    <td class="text-end fw-semibold">
+                        {% if cat.avg_current_price %}${{ "%.2f"|format(cat.avg_current_price) }}{% else %}—{% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endif %}
+
+{% endblock %}
