@@ -4,9 +4,11 @@
 #  Installs Flask if needed, then starts the app
 # ─────────────────────────────────────────────────────────────
 
-# Use the project venv Python
-PYTHON="/Users/memorodriguez/git/heb-grocery-tracker/venv/bin/python3"
-PIP="/Users/memorodriguez/git/heb-grocery-tracker/venv/bin/pip"
+# Resolve venv relative to this script's location (web-app-v2/../venv)
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+PROJECT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+PYTHON="$PROJECT_ROOT/venv/bin/python3"
+PIP="$PROJECT_ROOT/venv/bin/pip"
 
 echo ""
 echo "═══════════════════════════════════════"
