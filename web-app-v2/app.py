@@ -116,6 +116,12 @@ def db_unavailable(e):
 
 # ── Routes ─────────────────────────────────────────────────────────────────────
 
+@app.route('/health')
+def health():
+    """Lightweight healthcheck — no DB required."""
+    return 'OK', 200
+
+
 @app.route('/')
 def dashboard():
     conn = get_db()

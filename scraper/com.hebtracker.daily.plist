@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN"
+    "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+
+    <!-- Job label — must be unique on this Mac -->
+    <key>Label</key>
+    <string>com.hebtracker.daily</string>
+
+    <!-- Script to run -->
+    <key>ProgramArguments</key>
+    <array>
+        <string>/bin/bash</string>
+        <string>/Users/memorodriguez/git/heb-grocery-tracker/scraper/daily_scrape.sh</string>
+    </array>
+
+    <!-- Run at 7:00 AM every day -->
+    <key>StartCalendarInterval</key>
+    <dict>
+        <key>Hour</key>
+        <integer>7</integer>
+        <key>Minute</key>
+        <integer>0</integer>
+    </dict>
+
+    <!-- If the Mac was asleep at 7am, launchd will run this job
+         as soon as the Mac wakes up. The script itself then waits
+         15 minutes before starting the scrape. -->
+
+    <!-- Log stdout and stderr -->
+    <key>StandardOutPath</key>
+    <string>/Users/memorodriguez/git/heb-grocery-tracker/scraper/launchd.log</string>
+    <key>StandardErrorPath</key>
+    <string>/Users/memorodriguez/git/heb-grocery-tracker/scraper/launchd.log</string>
+
+    <!-- Run even if the job takes a long time -->
+    <key>TimeOut</key>
+    <integer>7200</integer>
+
+    <!-- Keep the job loaded (don't unload after one run) -->
+    <key>RunAtLoad</key>
+    <false/>
+
+</dict>
+</plist>

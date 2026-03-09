@@ -16,17 +16,21 @@ from requests.sessions import Session
 import time
 from datetime import datetime
 import psycopg2
+from dotenv import load_dotenv
+
+# Load .env from web-app-v2 (shared config for whole project)
+load_dotenv(dotenv_path=os.path.join(os.path.dirname(__file__), '../web-app-v2/.env'))
 
 
 def create_database():
-    """Create PostgreSQL database connection"""
+    """Create local PostgreSQL database connection"""
     try:
         conn = psycopg2.connect(
-            host=os.getenv('DB_HOST', 'localhost'),
-            port=int(os.getenv('DB_PORT', '5432')),
-            database=os.getenv('DB_NAME', 'heb_products'),
-            user=os.getenv('DB_USER', 'postgres'),
-            password=os.getenv('DB_PASSWORD', '')
+            host=os.getenv('LOCAL_DB_HOST', 'localhost'),
+            port=int(os.getenv('LOCAL_DB_PORT', '5432')),
+            database=os.getenv('LOCAL_DB_NAME', 'heb_products'),
+            user=os.getenv('LOCAL_DB_USER', 'postgres'),
+            password=os.getenv('LOCAL_DB_PASSWORD', '')
         )
         return conn
     except Exception as e:
