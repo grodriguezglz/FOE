@@ -36,11 +36,11 @@ LOCAL_DB = dict(
 # Get these from: Supabase Dashboard → Settings → Database → Connection string
 # Use the "URI" format and paste the values below, or set env vars.
 SUPABASE_DB = dict(
-    host     = os.getenv('SUPABASE_HOST',     'aws-0-us-west-2.pooler.supabase.com'),
+    host     = os.getenv('SUPABASE_HOST'),
     port     = int(os.getenv('SUPABASE_PORT', '5432')),
-    database = os.getenv('SUPABASE_DB',       'postgres'),
-    user     = os.getenv('SUPABASE_USER',     'postgres.lmtzpmexmliseywwqroj'),
-    password = os.getenv('SUPABASE_PASSWORD', 'mibhyd-4zowve-mugZix'),
+    database = os.getenv('SUPABASE_DB',   'postgres'),
+    user     = os.getenv('SUPABASE_USER'),
+    password = os.getenv('SUPABASE_PASSWORD'),
     sslmode  = 'require',   # Supabase requires SSL
 )
 
